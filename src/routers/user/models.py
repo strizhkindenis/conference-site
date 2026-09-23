@@ -1,13 +1,15 @@
 from enum import StrEnum, auto
 from typing import Annotated
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from sqlmodel import JSON, Column, Field, SQLModel, UniqueConstraint
 
 
 class ReportFormType(StrEnum):
     fundamental = auto()
     applied = auto()
+    classical = auto()
+    nonlinear = auto()
 
 
 class ReportType(StrEnum):
@@ -20,6 +22,14 @@ class ReportForm(BaseModel):
 
     report_name: str | None = None
     report_type: ReportType = Field(default=ReportType.original)
+
+    @model_validator(mode="after")
+    def normalize_legacy_form_type(self):
+        if self.form_type == ReportFormType.classical:
+            self.form_type = ReportFormType.fundamental
+        elif self.form_type == ReportFormType.nonlinear:
+            self.form_type = ReportFormType.applied
+        return self
 
     flag_bio_phys: bool = False
     flag_comp_sci: bool = False
