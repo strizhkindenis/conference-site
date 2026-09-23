@@ -6,7 +6,7 @@ from pydantic import BaseModel, model_validator
 from src.routers.files.models import File
 from src.schemas import BaseContext
 
-from .models import ReportFormType, ReportType, User, UserRole
+from .models import ReportFormType, User, UserRole
 
 
 class UserForm(BaseModel):
@@ -23,9 +23,7 @@ class UserForm(BaseModel):
     # Report Form
     form_type: ReportFormType | None = None
 
-    # Classical fields
     report_name: str | None = None
-    report_type: ReportType | None = None
 
     # Common flags
     flag_bio_phys: bool = False
@@ -38,28 +36,14 @@ class UserForm(BaseModel):
     flag_space_phys: bool = False
     report_file: UploadFile | None = None
 
-    # Nonlinear fields
     work_place: str | None = None
     supervisor: str | None = None
     expected_topic: str | None = None
 
     @model_validator(mode="after")
     def validate_form_type_fields(self) -> Self:
-        if self.role == UserRole.participant:
-            if self.form_type == ReportFormType.classical:
-                self.work_place = None
-                self.supervisor = None
-                self.expected_topic = None
-            elif self.form_type == ReportFormType.nonlinear:
-                self.report_name = None
-                self.report_type = None
-        else:
+        if self.role != UserRole.participant:
             self.form_type = None
-            self.report_name = None
-            self.report_type = None
-            self.work_place = None
-            self.supervisor = None
-            self.expected_topic = None
         return self
 
 

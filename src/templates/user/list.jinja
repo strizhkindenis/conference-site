@@ -36,15 +36,7 @@
                             {% endif %}
                         </td>
                         <td class="text-wrap text-break rep-name-col">
-                            {% if user.form %}
-                                {% if user.form.form_type == "nonlinear" %}
-                                    {{ user.form.expected_topic|default('---', true) }}
-                                {% else %}
-                                    {{ user.form.report_name|default('---', true) }}
-                                {% endif %}
-                            {% else %}
-                                ---
-                            {% endif %}
+                            {{ user.form.report_name|default('---', true) if user.form else '---' }}
                         </td>
                         <td>
                             {% if user.form.file_id %}

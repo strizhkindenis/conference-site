@@ -2,7 +2,7 @@ import urllib
 from io import BytesIO
 from typing import Annotated
 
-from fastapi import APIRouter, Form, HTTPException
+from fastapi import APIRouter, Form, HTTPException, status
 from fastapi.responses import HTMLResponse, StreamingResponse
 from openpyxl import Workbook
 
@@ -149,23 +149,15 @@ async def generate_excel(
             user.patronymic,
             user.organization,
             user.year,
-            "Классический"
-            if user.form and user.form.form_type == "classical"
-            else "Нелинейный"
+            "Фундаментальный"
+            if user.form and user.form.form_type == "fundamental"
+            else "Прикладной"
             if user.form
             else "",
-            user.form.report_name
-            if user.form and user.form.form_type == "classical"
-            else "",
-            user.form.expected_topic
-            if user.form and user.form.form_type == "nonlinear"
-            else "",
-            user.form.work_place
-            if user.form and user.form.form_type == "nonlinear"
-            else "",
-            user.form.supervisor
-            if user.form and user.form.form_type == "nonlinear"
-            else "",
+            user.form.report_name if user.form else "",
+            user.form.expected_topic if user.form else "",
+            user.form.work_place if user.form else "",
+            user.form.supervisor if user.form else "",
         ]
 
         # Append the row data to the sheet

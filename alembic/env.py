@@ -7,11 +7,12 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlmodel import SQLModel
 
 from alembic import context
-
-from src.settings import settings
-from src.routers.user.models import User
 from src.routers.files.models import File
+from src.routers.user.models import User
 from src.routers.vote.models import Vote
+from src.settings import settings
+
+_models = (File, User, Vote)
 
 print(settings)
 # this is the Alembic Config object, which provides

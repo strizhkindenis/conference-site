@@ -177,7 +177,6 @@ class UserController:
         report_form = ReportForm(
             form_type=form.form_type,
             report_name=form.report_name,
-            report_type=form.report_type,
             flag_bio_phys=form.flag_bio_phys,
             flag_comp_sci=form.flag_comp_sci,
             flag_math_phys=form.flag_math_phys,

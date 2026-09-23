@@ -1,34 +1,38 @@
 from enum import StrEnum, auto
 from typing import Annotated
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from sqlmodel import JSON, Column, Field, SQLModel, UniqueConstraint
 
 
-class ReportType(StrEnum):
-    original = auto()
-    scipop = auto()
-
-
 class ReportFormType(StrEnum):
+    fundamental = auto()
+    applied = auto()
     classical = auto()
     nonlinear = auto()
 
 
 class ReportForm(BaseModel):
-    form_type: ReportFormType = Field(default=ReportFormType.classical)
+    form_type: ReportFormType = Field(default=ReportFormType.fundamental)
 
     report_name: str | None = None
-    report_type: ReportType | None = None
 
-    flag_bio_phys: bool
-    flag_comp_sci: bool
-    flag_math_phys: bool
-    flag_med_phys: bool
-    flag_nano_tech: bool
-    flag_general_phys: bool
-    flag_solid_body: bool
-    flag_space_phys: bool
+    @model_validator(mode="after")
+    def normalize_legacy_form_type(self):
+        if self.form_type == ReportFormType.classical:
+            self.form_type = ReportFormType.fundamental
+        elif self.form_type == ReportFormType.nonlinear:
+            self.form_type = ReportFormType.applied
+        return self
+
+    flag_bio_phys: bool = False
+    flag_comp_sci: bool = False
+    flag_math_phys: bool = False
+    flag_med_phys: bool = False
+    flag_nano_tech: bool = False
+    flag_general_phys: bool = False
+    flag_solid_body: bool = False
+    flag_space_phys: bool = False
 
     file_id: int | None = None
 

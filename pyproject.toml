@@ -41,6 +41,7 @@ follow_untyped_imports = true
 line-length = 79
 
 [tool.ruff.lint]
+per-file-ignores = { "src/routers/vote/models.py" = ["E741"] }
 select = [
     # pycodestyle
     "E",
