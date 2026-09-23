@@ -177,6 +177,7 @@ class UserController:
         report_form = ReportForm(
             form_type=form.form_type,
             report_name=form.report_name,
+            report_type=form.report_type,
             flag_bio_phys=form.flag_bio_phys,
             flag_comp_sci=form.flag_comp_sci,
             flag_math_phys=form.flag_math_phys,
@@ -185,9 +186,6 @@ class UserController:
             flag_general_phys=form.flag_general_phys,
             flag_solid_body=form.flag_solid_body,
             flag_space_phys=form.flag_space_phys,
-            work_place=form.work_place,
-            supervisor=form.supervisor,
-            expected_topic=form.expected_topic,
             file_id=file.id if file is not None else None,
         )
 

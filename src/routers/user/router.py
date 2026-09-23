@@ -126,9 +126,7 @@ async def generate_excel(
         "Год обучения",
         "Тип доклада",
         "Название доклада",
-        "Предполагаемая тема",
-        "Место работы",
-        "Научный руководитель",
+        "Оригинальный или научно-популярный",
     ]
 
     # Write headers to the first row
@@ -155,9 +153,13 @@ async def generate_excel(
             if user.form
             else "",
             user.form.report_name if user.form else "",
-            user.form.expected_topic if user.form else "",
-            user.form.work_place if user.form else "",
-            user.form.supervisor if user.form else "",
+            (
+                "Оригинальный"
+                if user.form and user.form.report_type == "original"
+                else "Научно-популярный"
+                if user.form and user.form.report_type == "scipop"
+                else ""
+            ),
         ]
 
         # Append the row data to the sheet

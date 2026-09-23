@@ -131,39 +131,19 @@
                             </label>
                             <div class="invalid-feedback">Это поле необходимо заполнить</div>
                         </div>
-                        <div class="col-12 mt-3">
-                            <label class="form-label">
-                                <strong>Где делаешь науку:</strong>
-                                <input type="text"
-                                       class="form-control"
-                                       name="work_place"
-                                       value="{{ user.form.work_place|default('', true) }}"
-                                       required>
-                            </label>
-                            <div class="invalid-feedback">Это поле необходимо заполнить</div>
-                        </div>
-                        <div class="col-12 mt-3">
-                            <label class="form-label">
-                                <strong>Научный руководитель:</strong>
-                                <input type="text"
-                                       class="form-control"
-                                       name="supervisor"
-                                       value="{{ user.form.supervisor|default('', true) }}"
-                                       required>
-                            </label>
-                            <div class="invalid-feedback">Это поле необходимо заполнить</div>
-                        </div>
-                        <div class="col-12 mt-3">
-                            <label class="form-label">
-                                <strong>Предполагаемая тема:</strong>
-                                <input type="text"
-                                       class="form-control"
-                                       name="expected_topic"
-                                       value="{{ user.form.expected_topic|default('', true) }}"
-                                       required>
-                            </label>
-                            <div class="invalid-feedback">Это поле необходимо заполнить</div>
-                        </div>
+                        <p class="fs-6 mb-3 mt-4">
+                            <strong>Доклад оригинальный или научно-популярный:</strong>
+                        </p>
+                        <select class="form-select mb-5" name="report_type" required>
+                            <option value="original"
+                                    {% if not user.form or user.form.report_type == "original" %}selected{% endif %}>
+                                Оригинальный, собственное исследование (с научной новизной)
+                            </option>
+                            <option value="scipop"
+                                    {% if user.form and user.form.report_type == "scipop" %}selected{% endif %}>
+                                Научно-популярный, интересный сюжет/эффект/устройство
+                            </option>
+                        </select>
                         <p class="fs-6 mb-3 mt-4">
                             <strong>Область научного знания, к которой относится тема Вашего доклада:</strong>
                         </p>
