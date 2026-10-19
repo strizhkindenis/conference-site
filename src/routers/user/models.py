@@ -20,6 +20,17 @@ class ReportType(StrEnum):
 class ReportForm(BaseModel):
     form_type: ReportFormType = Field(default=ReportFormType.fundamental)
 
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_missing_values(cls, value):
+        if isinstance(value, dict):
+            value = value.copy()
+            if value.get("form_type") is None:
+                value["form_type"] = ReportFormType.fundamental
+            if value.get("report_type") is None:
+                value["report_type"] = ReportType.original
+        return value
+
     report_name: str | None = None
     report_type: ReportType = Field(default=ReportType.original)
 
