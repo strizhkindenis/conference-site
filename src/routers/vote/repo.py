@@ -78,20 +78,40 @@ class CandidateRepository:
         await self._session.flush()
         return candidate
 
-    async def mark_deleted(self, candidate_id: int) -> None:
-        await self._session.execute(
-            update(VoteCandidate)
-            .where(VoteCandidate.id == candidate_id)
-            .values(deleted=True)
+    async def delete_marked(self) -> None:
+        marked = await self._session.execute(
+            select(VoteCandidate.id).where(VoteCandidate.deleted.is_(True))
         )
+        candidate_ids = list(marked.scalars().all())
+        if candidate_ids:
+            await self._session.execute(
+                update(Vote).where(Vote.candidate_id.in_(candidate_ids)).values(
+                    candidate_id=None
+                )
+            )
+            await self._session.execute(
+                delete(VoteCandidate).where(
+                    VoteCandidate.id.in_(candidate_ids)
+                )
+            )
+
+    async def get_one(self, candidate_id: int) -> VoteCandidate:
+        result = await self._session.execute(
+            select(VoteCandidate).where(VoteCandidate.id == candidate_id)
+        )
+        return result.scalar_one()
 
     async def update(
-        self, candidate_id: int, name: str, work_name: str
+        self,
+        candidate_id: int,
+        name: str,
+        work_name: str,
+        deleted: bool = False,
     ) -> VoteCandidate:
         await self._session.execute(
             update(VoteCandidate)
             .where(VoteCandidate.id == candidate_id)
-            .values(name=name, work_name=work_name)
+            .values(name=name, work_name=work_name, deleted=deleted)
         )
         result = await self._session.execute(
             select(VoteCandidate).where(VoteCandidate.id == candidate_id)

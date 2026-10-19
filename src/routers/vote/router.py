@@ -204,6 +204,39 @@ async def post_admin(
     return templates.render("vote/admin.jinja", context)
 
 
+@vote_router.post("/admin/candidates/save", response_class=HTMLResponse)
+async def save_candidates(
+    templates: TemplateRenderer,
+    current_user: CurrentUser,
+    session: Session,
+    candidate_ids: Annotated[list[int] | None, Form()] = None,
+    names: Annotated[list[str] | None, Form()] = None,
+    work_names: Annotated[list[str] | None, Form()] = None,
+    deleted_ids: Annotated[list[int] | None, Form()] = None,
+):
+    if current_user.role != UserRole.admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    candidate_repo = CandidateRepository(session)
+    candidate_ids = candidate_ids or []
+    names = names or []
+    work_names = work_names or []
+    deleted_ids = set(deleted_ids or [])
+    for candidate_id, name, work_name in zip(
+        candidate_ids, names, work_names, strict=False
+    ):
+        await candidate_repo.update(
+            candidate_id,
+            name.strip(),
+            work_name.strip(),
+            candidate_id in deleted_ids,
+        )
+    await candidate_repo.delete_marked()
+    context = await get_vote_admin_context(
+        session, current_user, "Кандидаты сохранены."
+    )
+    return templates.render("vote/admin.jinja", context)
+
+
 @vote_router.post(
     "/admin/candidate/{candidate_id}", response_class=HTMLResponse
 )
@@ -219,17 +252,19 @@ async def update_candidate(
     if current_user.role != UserRole.admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     candidate_repo = CandidateRepository(session)
+    candidate = await candidate_repo.get_one(candidate_id)
     if deleted is not None:
-        await candidate_repo.mark_deleted(candidate_id)
+        candidate.deleted = True
     else:
-        if not name.strip() or not work_name.strip():
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
-            )
-        await candidate_repo.update(
-            candidate_id, name.strip(), work_name.strip()
-        )
+        candidate.deleted = False
+    candidate.name = name.strip()
+    candidate.work_name = work_name.strip()
+    await candidate_repo.update(
+        candidate_id, candidate.name, candidate.work_name, candidate.deleted
+    )
     context = await get_vote_admin_context(
-        session, current_user, "Кандидат сохранен."
+        session,
+        current_user,
+        "Изменения отмечены. Нажмите сохранить кандидатов.",
     )
     return templates.render("vote/admin.jinja", context)

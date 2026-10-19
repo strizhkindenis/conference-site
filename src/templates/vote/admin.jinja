@@ -4,114 +4,64 @@
         .candidate-delete-icon-filled { display: none; }
         input:checked + label .candidate-delete-icon { display: none; }
         input:checked + label .candidate-delete-icon-filled { display: inline; }
-        input:checked + label { background-color: var(--bs-danger); color: white; }
+        input:checked + label { background-color: rgba(238, 191, 69, 1); color: #212529; }
+        .candidate-edited { background-color: rgba(238, 191, 69, .35); }
     </style>
     {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
     <h2>Кандидаты из участников</h2>
     <form action="/vote/admin" method="post" enctype="multipart/form-data">
         <div class="table-responsive">
             <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>Выбрать</th>
-                        <th>Участник</th>
-                        <th>Работа</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Выбрать</th><th>Участник</th><th>Работа</th></tr></thead>
                 <tbody>
                     {% for participant in participants %}
                         <tr>
-                            <td>
-                                <input type="checkbox"
-                                       name="participant_ids"
-                                       value="{{ participant.user_id }}"
-                                       {% if participant.user_id in selected_user_ids %}checked{% endif %}>
-                            </td>
+                            <td><input type="checkbox" name="participant_ids" value="{{ participant.user_id }}" {% if participant.user_id in selected_user_ids %}checked{% endif %}></td>
                             <td>{{ participant.name }}</td>
                             <td>{{ participant.work_name|default('---', true) }}</td>
                         </tr>
                     {% else %}
-                        <tr>
-                            <td colspan="3">Участников нет.</td>
-                        </tr>
+                        <tr><td colspan="3">Участников нет.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        <button class="btn btn-primary"
-                type="submit"
-                name="selection_submit"
-                value="1">Сохранить выбранных</button>
+        <button class="btn btn-primary" type="submit" name="selection_submit" value="1">Сохранить выбранных</button>
     </form>
     <h2 class="mt-5">Произвольный кандидат</h2>
-    <form action="/vote/admin"
-          method="post"
-          enctype="multipart/form-data"
-          class="row g-3">
-        <div class="col-md-5">
-            <input class="form-control" name="arbitrary_name" placeholder="Имя" required>
-        </div>
-        <div class="col-md-5">
-            <input class="form-control"
-                   name="arbitrary_work_name"
-                   placeholder="Название работы"
-                   required>
-        </div>
-        <div class="col-md-2">
-            <button class="btn btn-secondary" type="submit">Добавить</button>
-        </div>
+    <form action="/vote/admin" method="post" enctype="multipart/form-data" class="row g-3">
+        <div class="col-md-5"><input class="form-control" name="arbitrary_name" placeholder="Имя" required></div>
+        <div class="col-md-5"><input class="form-control" name="arbitrary_work_name" placeholder="Название работы" required></div>
+        <div class="col-md-2"><button class="btn btn-secondary" type="submit">Добавить</button></div>
     </form>
     <h2 class="mt-5">Кандидаты для голосования</h2>
-    {% for candidate in candidates %}
-        <form action="/vote/admin/candidate/{{ candidate.id }}"
-              method="post"
-              class="row g-3 mb-3 {% if candidate.deleted %}text-decoration-line-through text-muted{% endif %}">
-            <div class="col-md-4">
-                <input class="form-control"
-                       name="name"
-                       value="{{ candidate.name }}"
-                       required>
+    <form action="/vote/admin/candidates/save" method="post">
+        {% for candidate in candidates %}
+            <div class="row g-3 mb-3 align-items-center {% if candidate.deleted %}text-decoration-line-through text-muted{% endif %}">
+                <input type="hidden" name="candidate_ids" value="{{ candidate.id }}">
+                <div class="col-md-4"><input class="form-control candidate-input" name="names" value="{{ candidate.name }}" data-original="{{ candidate.name }}" required></div>
+                <div class="col-md-5"><input class="form-control candidate-input" name="work_names" value="{{ candidate.work_name }}" data-original="{{ candidate.work_name }}" required></div>
+                <div class="col-md-1 form-check">
+                    <input class="form-check-input d-none" type="checkbox" name="deleted_ids" value="{{ candidate.id }}" id="deleted-{{ candidate.id }}" {% if candidate.deleted %}checked{% endif %}>
+                    <label class="btn btn-outline-danger" for="deleted-{{ candidate.id }}" title="Удалить">
+                        <i class="bi bi-trash candidate-delete-icon"></i><i class="bi bi-trash-fill candidate-delete-icon-filled"></i>
+                    </label>
+                </div>
             </div>
-            <div class="col-md-5">
-                <input class="form-control"
-                       name="work_name"
-                       value="{{ candidate.work_name }}"
-                       required>
-            </div>
-            <div class="col-md-1 form-check">
-                <input class="form-check-input d-none"
-                       type="checkbox"
-                       name="deleted"
-                       value="1"
-                       id="deleted-{{ candidate.id }}"
-                       {% if candidate.deleted %}checked{% endif %}>
-                <label class="btn btn-outline-danger"
-                       for="deleted-{{ candidate.id }}"
-                       title="Удалить">
-                    <i class="bi bi-trash candidate-delete-icon"></i>
-                    <i class="bi bi-trash-fill candidate-delete-icon-filled"></i>
-                </label>
-            </div>
-            <div class="col-md-2">
-                <button class="btn btn-outline-primary" type="submit">
-                    {% if candidate.deleted %}
-                        Удалено
-                    {% else %}
-                        Сохранить
-                    {% endif %}
-                </button>
-            </div>
-        </form>
-    {% else %}
-        <p>Кандидаты еще не выбраны.</p>
-    {% endfor %}
+        {% else %}<p>Кандидаты еще не выбраны.</p>{% endfor %}
+        {% if candidates %}<button class="btn btn-primary" type="submit">Сохранить кандидатов</button>{% endif %}
+    </form>
+    <script>
+        document.querySelectorAll('.candidate-input').forEach((input) => {
+            input.addEventListener('input', () => {
+                input.classList.toggle('candidate-edited', input.value !== input.dataset.original);
+            });
+        });
+    </script>
     <hr class="my-5">
     <h2>Коды голосования</h2>
     <form action="/vote/admin" method="post" enctype="multipart/form-data">
-        <input class="form-control mb-3"
-               type="file"
-               name="codes_file"
-               accept=".txt, text/plain">
+        <input class="form-control mb-3" type="file" name="codes_file" accept=".txt, text/plain">
         <button type="submit" class="btn btn-primary">Загрузить коды</button>
     </form>
     <p class="mt-3">Всего кодов: {{ all_cnt }}. Проголосовали: {{ voted_cnt }}</p>
