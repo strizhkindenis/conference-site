@@ -109,7 +109,7 @@ async def forbidden_exception_handler(request: Request, exc: HTTPException):
 
 
 @app.exception_handler(status.HTTP_500_INTERNAL_SERVER_ERROR)
-async def internal_exception_handler(request: Request, exc: HTTPException):
+async def internal_exception_handler(request: Request, exc: Exception):
     return get_templates().TemplateResponse(
         request=request,
         name="error.jinja",
@@ -117,6 +117,7 @@ async def internal_exception_handler(request: Request, exc: HTTPException):
             message="Ошибка сервера.",
             code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         ).model_dump(),
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
     )
 
 
