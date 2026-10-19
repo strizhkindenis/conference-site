@@ -2,3 +2,6 @@ __pycache__
 data.db
 test_codes.txt
 .DS_Store
+
+.tmp/
+.tmp/uv-bin/
