@@ -111,11 +111,11 @@ async def get_vote_admin_context(
                 name=f"{user.surname or ''} {user.name or ''}".strip()
                 or user.email,
                 work_name=(
-                    user.form.get("report_name", "")
+                    user.form.get("report_name") or ""
                     if isinstance(user.form, dict)
                     else user.form.report_name
                     if user.form
-                    else ""
+                    else "Без названия"
                 ),
             )
             for user in participants
@@ -177,11 +177,11 @@ async def post_admin(
             name=f"{user.surname or ''} {user.name or ''}".strip()
             or user.email,
             work_name=(
-                user.form.get("report_name", "")
+                user.form.get("report_name") or ""
                 if isinstance(user.form, dict)
                 else user.form.report_name
                 if user.form
-                else ""
+                else "Без названия"
             ),
         )
         for user in selected_users
