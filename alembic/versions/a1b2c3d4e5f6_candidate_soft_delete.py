@@ -18,15 +18,21 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    with op.batch_alter_table("votecandidate") as batch_op:
-        batch_op.add_column(
-            sa.Column(
-                "deleted",
-                sa.Boolean(),
-                nullable=False,
-                server_default=sa.false(),
+    connection = op.get_bind()
+    columns = {
+        column["name"]
+        for column in sa.inspect(connection).get_columns("votecandidate")
+    }
+    if "deleted" not in columns:
+        with op.batch_alter_table("votecandidate") as batch_op:
+            batch_op.add_column(
+                sa.Column(
+                    "deleted",
+                    sa.Boolean(),
+                    nullable=False,
+                    server_default=sa.false(),
+                )
             )
-        )
 
 
 def downgrade() -> None:
