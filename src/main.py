@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from alembic import command
 from src.depends import get_templates
+from src.logger import logger
 from src.routers.auth.router import auth_router
 from src.routers.files.router import file_router
 from src.routers.index import index_router
@@ -57,8 +58,12 @@ async def setup_admin_user():
 async def lifespan(app: FastAPI):
     import asyncio
 
-    await asyncio.to_thread(run_migrations)
-    await setup_admin_user()
+    try:
+        await asyncio.to_thread(run_migrations)
+        await setup_admin_user()
+    except Exception:
+        logger.exception("Application startup failed")
+        raise
     yield
 
 
