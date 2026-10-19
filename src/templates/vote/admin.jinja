@@ -1,23 +1,46 @@
 {% extends "base.jinja" %}
 {% block main %}
-    {% if message %}<div class="alert alert-success" role="alert">{{ message }}</div>{% endif %}
-    <ul>
-        {% for item in reports %}<li>{{ item }}</li>{% endfor %}
-    </ul>
+    {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
+    <h2>Кандидаты из участников</h2>
     <form action="/vote/admin" method="post" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label class="form-label">
-                <input class="form-control"
-                       type="file"
-                       name="codes_file"
-                       accept=".txt, text/plain">
-                Файл со списком Id для голосования
-            </label>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Выбрать</th><th>Участник</th><th>Работа</th></tr></thead>
+                <tbody>
+                    {% for participant in participants %}
+                        <tr>
+                            <td><input type="checkbox" name="participant_ids" value="{{ participant.user_id }}" {% if participant.user_id in selected_user_ids %}checked{% endif %}></td>
+                            <td>{{ participant.name }}</td>
+                            <td>{{ participant.work_name|default('---', true) }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="3">Участников нет.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button class="btn btn-primary" type="submit" name="selection_submit" value="1">Сохранить выбранных</button>
     </form>
+    <h2 class="mt-5">Произвольный кандидат</h2>
+    <form action="/vote/admin" method="post" enctype="multipart/form-data" class="row g-3">
+        <div class="col-md-5"><input class="form-control" name="arbitrary_name" placeholder="Имя" required></div>
+        <div class="col-md-5"><input class="form-control" name="arbitrary_work_name" placeholder="Название работы" required></div>
+        <div class="col-md-2"><button class="btn btn-secondary" type="submit">Добавить</button></div>
+    </form>
+    <h2 class="mt-5">Кандидаты для голосования</h2>
+    {% for candidate in candidates %}
+        <form action="/vote/admin/candidate/{{ candidate.id }}" method="post" class="row g-3 mb-3">
+            <div class="col-md-4"><input class="form-control" name="name" value="{{ candidate.name }}" required></div>
+            <div class="col-md-6"><input class="form-control" name="work_name" value="{{ candidate.work_name }}" required></div>
+            <div class="col-md-2"><button class="btn btn-outline-primary" type="submit">Сохранить</button></div>
+        </form>
+    {% else %}<p>Кандидаты еще не выбраны.</p>{% endfor %}
     <hr class="my-5">
-    <p>Всего кодов: {{ all_cnt }}</p>
-    <p>Проголосовали: {{ voted_cnt }}</p>
-    <img src={{ image }}>
+    <h2>Коды голосования</h2>
+    <form action="/vote/admin" method="post" enctype="multipart/form-data">
+        <input class="form-control mb-3" type="file" name="codes_file" accept=".txt, text/plain">
+        <button type="submit" class="btn btn-primary">Загрузить коды</button>
+    </form>
+    <p class="mt-3">Всего кодов: {{ all_cnt }}. Проголосовали: {{ voted_cnt }}</p>
+    <img class="img-fluid" src="{{ image }}" alt="Результаты голосования">
 {% endblock %}

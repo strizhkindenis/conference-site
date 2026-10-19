@@ -1,48 +1,31 @@
 {% extends "base.jinja" %}
-{% block title %}{{ title }}{% endblock %}
 {% block main %}
-    <h4 class="mb-3 text-center">Голосование за лучшего докладчика</h4>
-    <div class="d-flex justify-content-center">
-        <div class="col-md-8">
-            {% if error %}<div class="alert alert-danger" role="alert">{{ error }}</div>{% endif %}
-            {% if message %}<div class="alert alert-success" role="alert">{{ message }}</div>{% endif %}
-            <form action="/vote" method="post">
-                <div id="reportFormParent">
-                    <div id="reportForm">
-                        <div class="mb-3">
-                            <label class="form-label">
-                                <strong>Введите выданный id участника</strong>
-                                <input type="login" class="form-control" name="code" value="" required>
-                            </label>
-                        </div>
-                        <p class="fs-6 mb-3 mt-4">
-                            <strong>Выберите лучший доклад:</strong>
-                        </p>
-                        {% for report in reports %}
-                            <div class="form-check border border-2 rounded">
-                                <label class="form-check-label p-2">
-                                    <input class="form-check-input"
-                                           type="radio"
-                                           name="report"
-                                           value="{{ report[0] }}"
-                                           {% if report[0] == selected %}checked{% endif %}
-                                           required>
-                                    {{ report[1] }}
-                                </label>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                <br>
-                <p class="text-break text-center fs-5 lh-base p-2 border border-3 rounded border-success">
-                    Оставить анонимный отзыв и предложения по улучшению организации можно по <a href="https://forms.yandex.ru/u/68ed27e1505690903e255a94/"
-    class="text-reset">ссылке</a>.
-                </p>
-                <hr class="my-5">
-                <div class="d-flex justify-content-center mt-3">
-                    <button class="btn btn-success btn-lg" type="submit">Сохранить</button>
-                </div>
-            </form>
+    {% if message %}<div class="alert alert-success">{{ message }}</div>{% endif %}
+    {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+    <form action="/vote/" method="post">
+        <div class="mb-3">
+            <label class="form-label" for="code">Код голосования</label>
+            <input class="form-control" id="code" name="code" required>
         </div>
-    </div>
+        <fieldset class="mb-3">
+            <legend>Кандидаты</legend>
+            {% for candidate in reports %}
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="radio"
+                           name="candidate_id"
+                           value="{{ candidate.id }}"
+                           id="candidate-{{ candidate.id }}"
+                           {% if selected == candidate.id %}checked{% endif %}
+                           required>
+                    <label class="form-check-label" for="candidate-{{ candidate.id }}">
+                        {{ candidate.name }} — {{ candidate.work_name }}
+                    </label>
+                </div>
+            {% else %}
+                <p>Кандидаты еще не выбраны.</p>
+            {% endfor %}
+        </fieldset>
+        <button class="btn btn-primary" type="submit">Проголосовать</button>
+    </form>
 {% endblock %}

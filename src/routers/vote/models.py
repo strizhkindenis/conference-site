@@ -19,6 +19,15 @@ class Reports(StrEnum):
     l = auto()
 
 
+class VoteCandidate(SQLModel, table=True):
+    id: Annotated[int | None, Field(default=None, primary_key=True)]
+    user_id: Annotated[int | None, Field(default=None, unique=True)]
+    name: Annotated[str, Field(sa_column=Column(String(200), nullable=False))]
+    work_name: Annotated[
+        str, Field(sa_column=Column(String(500), nullable=False))
+    ]
+
+
 class Vote(SQLModel, table=True):
     __table_args__ = (UniqueConstraint("code", name="uq_vote_code"),)
 
@@ -34,3 +43,6 @@ class Vote(SQLModel, table=True):
             sa_column=Column(Enum(Reports), nullable=True),
         ),
     ]
+    candidate_id: int | None = Field(
+        default=None, foreign_key="votecandidate.id"
+    )

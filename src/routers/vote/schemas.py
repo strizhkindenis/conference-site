@@ -1,93 +1,34 @@
 from fastapi import UploadFile
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.routers.user.schemas import UserContext
 
-from .models import Reports
+from .models import VoteCandidate
 
 
 class VoteFormContext(UserContext):
-    selected: Reports | None = None
-    reports: list[tuple[Reports, str]] = [
-        (
-            Reports.a,
-            (
-                "Ульяна Мельникова (4 курс СПбГУ) — Динамика и устойчивость "
-                "циркумбинарных планетных систем"
-            ),
-        ),
-        (
-            Reports.b,
-            (
-                "Даниил Лысенко (3 курс) — Модель аккреционного диска и "
-                "абсорбционные системы"
-            ),
-        ),
-        (
-            Reports.c,
-            (
-                "Анастасия Попова (4 курс) — Сверхбыстрая "
-                "лазерно-индуцированная спиновая ориентация в "
-                "скомпенсированном "
-                "антиферромагнетике Cr2O3"
-            ),
-        ),
-        (
-            Reports.d,
-            (
-                "Андрей Оглоблин (4 курс) — Некоторые особенности спектров "
-                "квазаров"
-            ),
-        ),
-        (
-            Reports.e,
-            "Алексей Косолапов (5 курс) — О некоторых звуках электропоездов",
-        ),
-        # (
-        #     Reports.f,
-        #     "Илья Тетенькин (ЛЭТИ) — Нанесение металлических контактов "
-        #     "на объёмные кристаллы Ga2O3",
-        # ),
-        # (
-        #     Reports.g,
-        #     "Надежда Ченцова (СПбПУ) — Откуда берется ошибка в два "
-        #     "порядка при квантовомеханическом туннелировании при измерениях "
-        #     "в макромире",
-        # ),
-        # (
-        #     Reports.h,
-        #     "Анастасия Малевская — Моделирование вольт-амперных "
-        #     "характеристик и оптимизация фотоэлектрических реобразователей "
-        #     "с точечным тыльным контактом",
-        # ),
-        # (
-        #     Reports.i,
-        #     "Даниил Пономарев — Разработка программы для моделирования "
-        #     "звездного ядра",
-        # ),
-        # (
-        #     Reports.j,
-        #     "Ксения Балашова (СПбПУ) — Исследование оптимизации процесса "
-        #     "подготовки катализатора для выращивания углеродных нанотрубок",
-        # ),
-        # (
-        #     Reports.k,
-        #     "Дмитрий Бабин — Неаффинные деформации в аморфных материалах",
-        # ),
-        # (Reports.l, "Наталья Ионова (СПбГУ) — Любительская астрофотография"),
-    ]
+    selected: int | None = None
+    reports: list[VoteCandidate] = []
 
 
 class VoteForm(BaseModel):
     code: str
-    report: Reports
+    candidate_id: int
 
 
 class VoteAdminContext(UserContext):
     all_cnt: int
     voted_cnt: int
     image: str
+    participants: list[VoteCandidate] = []
+    candidates: list[VoteCandidate] = []
+    selected_user_ids: list[int] = []
 
 
 class CodesForm(BaseModel):
     codes_file: UploadFile
+
+
+class CandidateForm(BaseModel):
+    name: str = Field(min_length=1)
+    work_name: str = Field(min_length=1)
