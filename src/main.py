@@ -110,6 +110,7 @@ async def forbidden_exception_handler(request: Request, exc: HTTPException):
 
 @app.exception_handler(status.HTTP_500_INTERNAL_SERVER_ERROR)
 async def internal_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled request error", exc_info=exc)
     return get_templates().TemplateResponse(
         request=request,
         name="error.jinja",
