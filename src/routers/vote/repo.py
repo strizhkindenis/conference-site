@@ -32,7 +32,10 @@ class VoteRepository:
 
     async def update(self, code: str, candidate_id: int) -> Vote:
         candidate = await self._session.execute(
-            select(VoteCandidate).where(VoteCandidate.id == candidate_id)
+            select(VoteCandidate).where(
+                VoteCandidate.id == candidate_id,
+                VoteCandidate.deleted.is_(False),
+            )
         )
         candidate.scalar_one()
         stmt = (
@@ -51,10 +54,13 @@ class CandidateRepository:
     def __init__(self, session: AsyncSession):
         self._session = session
 
-    async def get_all(self) -> list[VoteCandidate]:
-        result = await self._session.execute(
-            select(VoteCandidate).order_by(VoteCandidate.id)
-        )
+    async def get_all(
+        self, include_deleted: bool = False
+    ) -> list[VoteCandidate]:
+        statement = select(VoteCandidate).order_by(VoteCandidate.id)
+        if not include_deleted:
+            statement = statement.where(VoteCandidate.deleted.is_(False))
+        result = await self._session.execute(statement)
         return list(result.scalars().all())
 
     async def replace(self, candidates: list[VoteCandidate]) -> None:
@@ -71,6 +77,13 @@ class CandidateRepository:
         self._session.add(candidate)
         await self._session.flush()
         return candidate
+
+    async def mark_deleted(self, candidate_id: int) -> None:
+        await self._session.execute(
+            update(VoteCandidate)
+            .where(VoteCandidate.id == candidate_id)
+            .values(deleted=True)
+        )
 
     async def update(
         self, candidate_id: int, name: str, work_name: str

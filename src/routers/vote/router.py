@@ -91,7 +91,9 @@ async def get_vote_admin_context(
     session: Session, current_user: User, message: str | None = None
 ) -> VoteAdminContext:
     votes = await VoteRepository(session).get()
-    candidates = await CandidateRepository(session).get_all()
+    candidates = await CandidateRepository(session).get_all(
+        include_deleted=True
+    )
     result = await session.execute(
         select(User)
         .where(User.role == UserRole.participant)
@@ -212,14 +214,21 @@ async def update_candidate(
     session: Session,
     name: Annotated[str, Form()],
     work_name: Annotated[str, Form()],
+    deleted: Annotated[str | None, Form()] = None,
 ):
     if current_user.role != UserRole.admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-    if not name.strip() or not work_name.strip():
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
-    await CandidateRepository(session).update(
-        candidate_id, name.strip(), work_name.strip()
-    )
+    candidate_repo = CandidateRepository(session)
+    if deleted is not None:
+        await candidate_repo.mark_deleted(candidate_id)
+    else:
+        if not name.strip() or not work_name.strip():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+        await candidate_repo.update(
+            candidate_id, name.strip(), work_name.strip()
+        )
     context = await get_vote_admin_context(
         session, current_user, "Кандидат сохранен."
     )

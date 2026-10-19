@@ -31,7 +31,8 @@
     {% for candidate in candidates %}
         <form action="/vote/admin/candidate/{{ candidate.id }}" method="post" class="row g-3 mb-3">
             <div class="col-md-4"><input class="form-control" name="name" value="{{ candidate.name }}" required></div>
-            <div class="col-md-6"><input class="form-control" name="work_name" value="{{ candidate.work_name }}" required></div>
+            <div class="col-md-5"><input class="form-control" name="work_name" value="{{ candidate.work_name }}" required></div>
+            <div class="col-md-1 form-check"><input class="form-check-input" type="checkbox" name="deleted" value="1" id="deleted-{{ candidate.id }}" {% if candidate.deleted %}checked{% endif %}><label class="form-check-label" for="deleted-{{ candidate.id }}">Удалить</label></div>
             <div class="col-md-2"><button class="btn btn-outline-primary" type="submit">Сохранить</button></div>
         </form>
     {% else %}<p>Кандидаты еще не выбраны.</p>{% endfor %}

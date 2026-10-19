@@ -26,6 +26,7 @@ class VoteCandidate(SQLModel, table=True):
     work_name: Annotated[
         str, Field(sa_column=Column(String(500), nullable=False))
     ]
+    deleted: bool = Field(default=False, nullable=False)
 
 
 class Vote(SQLModel, table=True):
