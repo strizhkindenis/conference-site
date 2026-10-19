@@ -126,7 +126,7 @@ async def get_vote_admin_context(
         selected_user_ids=[
             candidate.user_id
             for candidate in candidates
-            if candidate.user_id is not None
+            if candidate.user_id is not None and not candidate.deleted
         ],
     )
 
